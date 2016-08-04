@@ -3,6 +3,7 @@ package org.zouzias.spark.lucenerdd.aws.utils
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 import org.joda.time.DateTime
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
 
 object WikipediaUtils {
@@ -22,7 +23,8 @@ object WikipediaUtils {
 
   def dayString(): String = {
     val date = new DateTime()
-    s"${date.getYear} ${date.getMonthOfYear()} ${date.getDayOfMonth()}"
+    val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+    formatter.print(date)
   }
 
 }
