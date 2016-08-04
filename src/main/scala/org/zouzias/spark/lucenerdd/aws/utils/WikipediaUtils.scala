@@ -22,7 +22,7 @@ object WikipediaUtils {
 
   def dayString(): String = {
     val date = new DateTime()
-    s"${date.year()} ${date.monthOfYear()} ${date.dayOfWeek().getAsText()}"
+    s"${date.getYear} ${date.getMonthOfYear()} ${date.getDayOfMonth()}"
   }
 
 }
