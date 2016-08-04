@@ -1,17 +1,13 @@
 package org.zouzias.spark.lucenerdd.aws.utils
 
-import java.text.{DateFormat, FieldPosition, ParsePosition}
-import java.util.Date
-
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 import org.joda.time.DateTime
 
 
-
 object WikipediaUtils {
 
-
+  val FuzzyEditDistance = 1
   val topK = 10
 
   def loadWikipediaTitles(implicit sqlContext: SQLContext): RDD[String] = {

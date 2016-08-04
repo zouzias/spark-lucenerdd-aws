@@ -48,7 +48,7 @@ object WikipediaSearchExample extends Logging {
       searchType match{
         case SearchType.TermQuery => luceneRDD.termQuery("_1", title, WikipediaUtils.topK)
         case SearchType.PrefixQuery => luceneRDD.prefixQuery("_1", title, WikipediaUtils.topK)
-        case SearchType.FuzzyQuery => luceneRDD.fuzzyQuery("_1", title, WikipediaUtils.topK)
+        case SearchType.FuzzyQuery => luceneRDD.fuzzyQuery("_1", title, WikipediaUtils.FuzzyEditDistance, WikipediaUtils.topK)
         case SearchType.PhraseQuery => luceneRDD.phraseQuery("_1", title, WikipediaUtils.topK)
       }
       val end = System.currentTimeMillis()
