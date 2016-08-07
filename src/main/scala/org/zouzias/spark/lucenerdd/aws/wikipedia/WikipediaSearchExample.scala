@@ -67,7 +67,7 @@ object WikipediaSearchExample extends Logging {
     import sqlContext.implicits._
     val timingsDF = timings.map(Timing(searchInfo.searchType.toString, _)).toDF()
 
-    timingsDF.write.mode(SaveMode.Append).parquet(s"s3://spark-lucenerdd/timings/v0.0.18/timing-search-${WikipediaUtils.dayString}-${SearchInfo.toString}.parquet")
+    timingsDF.write.mode(SaveMode.Append).parquet(s"s3://spark-lucenerdd/timings/v0.0.18/timing-search-${WikipediaUtils.dayString}-${SearchInfo.print}.parquet")
 
   }
 
