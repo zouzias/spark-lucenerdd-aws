@@ -5,7 +5,7 @@ import org.zouzias.spark.lucenerdd.aws.utils.SearchType.SearchType
 
 case class SearchInfo(searchType: SearchType, executorInstances: String, executorMemory: String, executorCores: String){
 
-  def print(): String = {
+  override def toString(): String = {
     s"${searchType.toString}-${executorInstances}-${executorMemory}-${executorCores}"
   }
 }
