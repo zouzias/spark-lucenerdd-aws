@@ -15,6 +15,8 @@ ${SPARK_HOME}/bin/spark-submit   --conf "spark.executor.memory=512m" \
 				--conf "spark.driver.memory=512m" \
 				--conf "spark.executor.cores=1" \
 				--conf "spark.executor.instances=2" \
+				--conf "spark.serializer=org.apache.spark.serializer.KryoSerializer" \
+				--conf "spark.kryo.registrator=org.zouzias.spark.lucenerdd.LuceneRDDKryoRegistrator" \
 				--master local \
 				--class org.zouzias.spark.lucenerdd.aws.wikipedia.WikipediaSearchExample \
 				"${MAIN_JAR}"
