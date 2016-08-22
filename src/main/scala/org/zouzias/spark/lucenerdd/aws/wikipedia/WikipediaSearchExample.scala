@@ -34,6 +34,7 @@ object WikipediaSearchExample extends Logging {
     val wiki = WikipediaUtils.loadWikipediaTitles
     val luceneRDD = LuceneRDD(wiki)
     luceneRDD.cache()
+    luceneRDD.count() // To force caching
     logInfo("Wikipedia titles loaded successfully")
 
     val wikiSample = WikipediaUtils.sampleTopKWikipediaTitles(1000)
