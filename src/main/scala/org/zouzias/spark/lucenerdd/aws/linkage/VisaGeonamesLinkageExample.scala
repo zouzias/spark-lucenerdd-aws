@@ -12,7 +12,7 @@ object VisaGeonamesLinkageExample extends Logging {
   def main(args: Array[String]) {
 
     // initialise spark context
-    val conf = new SparkConf().setAppName("VisaGeonamesLinkageExample")
+    val conf = new SparkConf().setAppName(VisaGeonamesLinkageExample.getClass.getName)
 
     //
     implicit val sc = new SparkContext(conf)
