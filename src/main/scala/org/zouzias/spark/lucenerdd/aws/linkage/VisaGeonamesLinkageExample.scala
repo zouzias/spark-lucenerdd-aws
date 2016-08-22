@@ -60,7 +60,7 @@ object VisaGeonamesLinkageExample extends Logging {
     val linkedDF = linked.map{ case (left, right) => LinkedRecord(left, right.headOption.map(_.doc.textField(fieldName).toArray))}
       .toDF()
 
-    linkedDF.write.mode(SaveMode.Overwrite).parquet(s"s3://spark-lucenerdd/timings/v0.0.18/visa-vs-geonames-linkage-${today}.parquet")
+    linkedDF.write.mode(SaveMode.Overwrite).parquet(s"s3://spark-lucenerdd/timings/v0.0.20/visa-vs-geonames-linkage-${today}.parquet")
 
     // terminate spark context
     sc.stop()
