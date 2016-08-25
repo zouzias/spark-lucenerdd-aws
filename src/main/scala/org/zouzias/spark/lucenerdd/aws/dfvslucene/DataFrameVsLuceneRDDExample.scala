@@ -1,11 +1,15 @@
 package org.zouzias.spark.lucenerdd.aws.dfvslucene
 
-import org.apache.spark.sql.{SQLContext, SaveMode}
+import org.apache.spark.sql.SQLContext
 import org.apache.spark.{Logging, SparkConf, SparkContext}
-import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, WikipediaUtils}
-import org.zouzias.spark.lucenerdd.{LuceneRDD, _}
+import org.zouzias.spark.lucenerdd.aws.utils.WikipediaUtils
+import org.zouzias.spark.lucenerdd.facets.FacetedLuceneRDD
+import org.zouzias.spark.lucenerdd._
+import org.apache.spark.sql.functions._
+
+
 /**
- * H1B visas vs geonames cities linkage example
+ * Dataframe vs LuceneRDD
  */
 object DataFrameVsLuceneRDDExample extends Logging {
 
@@ -22,22 +26,41 @@ object DataFrameVsLuceneRDDExample extends Logging {
     val executorMemory = conf.get("spark.executor.memory")
     val executorCores = conf.get("spark.executor.cores")
     val executorInstances = conf.get("spark.executor.instances")
-    val fieldName = "lca_case_employer_city"
+    val fieldName = "Country"
 
 
     log.info(s"Executor instances: ${executorInstances}")
     log.info(s"Executor cores: ${executorCores}")
     log.info(s"Executor memory: ${executorMemory}")
 
-    logInfo("Loading H1B Visa")
-    val visaDF = sqlContext.read.parquet("s3://h1b-visa-enigma.io/enigma-io-h1bvisa.parquet")
-    val luceneRDD = LuceneRDD(visaDF.select(fieldName))
+    logInfo("Loading Cities")
+    val citiesDF = sqlContext.read.parquet("/Users/taazoan3/recordLinkageData/maxmind/world-cities-maxmind.parquet")
+    citiesDF.cache()
+    citiesDF.count()
+    val luceneRDD = FacetedLuceneRDD(citiesDF)
     luceneRDD.cache()
-    logInfo("H1B Visas loaded successfully")
+    luceneRDD.count()
+    logInfo("Cities loaded successfully")
+
+    val k = 10
+
+    val dfStart = System.currentTimeMillis()
+    val dfResults = citiesDF.groupBy("Country").count().sort(desc("count")).take(k)
+    val dfEnd = System.currentTimeMillis()
+
+    val lucStart =System.currentTimeMillis()
+    val luceneResults = luceneRDD.facetQuery("*:*", "Country", k)
+    val lucEnd =System.currentTimeMillis()
 
 
+    println("=" * 10)
+    println(s"DF time: ${dfEnd - dfStart} / 1000 seconds")
+    println("=" * 10)
+    println(s"Lucene time: ${lucEnd - lucStart} / 1000 seconds")
+    println("=" * 10)
 
-    linkedDF.write.mode(SaveMode.Overwrite).parquet(s"s3://spark-lucenerdd/timings/v0.0.20/dataframe-vs-lucenerdd-${today}.parquet")
+
+    // linkedDF.write.mode(SaveMode.Overwrite).parquet(s"s3://spark-lucenerdd/timings/v0.0.20/dataframe-vs-lucenerdd-${today}.parquet")
 
     // terminate spark context
     sc.stop()
