@@ -2,7 +2,7 @@ package org.zouzias.spark.lucenerdd.aws.linkage
 
 import org.apache.spark.sql.{SQLContext, SaveMode}
 import org.apache.spark.{Logging, SparkConf, SparkContext}
-import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, WikipediaUtils}
+import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, Utils, WikipediaUtils}
 import org.zouzias.spark.lucenerdd.{LuceneRDD, _}
 /**
  * H1B visas vs geonames cities linkage example
@@ -60,7 +60,7 @@ object VisaGeonamesLinkageExample extends Logging {
     val linkedDF = linked.map{ case (left, right) => LinkedRecord(left, right.headOption.map(_.doc.textField(fieldName).toArray))}
       .toDF()
 
-    linkedDF.write.mode(SaveMode.Overwrite).parquet(s"s3://spark-lucenerdd/timings/v0.0.20/visa-vs-geonames-linkage-${today}.parquet")
+    linkedDF.write.mode(SaveMode.Overwrite).parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-${today}.parquet")
 
     // terminate spark context
     sc.stop()

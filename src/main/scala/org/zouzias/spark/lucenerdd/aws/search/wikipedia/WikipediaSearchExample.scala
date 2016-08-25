@@ -1,10 +1,10 @@
-package org.zouzias.spark.lucenerdd.aws.wikipedia
+package org.zouzias.spark.lucenerdd.aws.search.wikipedia
 
 import org.apache.spark.sql.{SQLContext, SaveMode}
 import org.apache.spark.{Logging, SparkConf, SparkContext}
 import org.zouzias.spark.lucenerdd.LuceneRDD
 import org.zouzias.spark.lucenerdd._
-import org.zouzias.spark.lucenerdd.aws.utils.{SearchInfo, SearchType, Timing, WikipediaUtils}
+import org.zouzias.spark.lucenerdd.aws.utils._
 
 
 /**
@@ -68,7 +68,7 @@ object WikipediaSearchExample extends Logging {
     import sqlContext.implicits._
     val timingsDF = timings.map(Timing(searchInfo.searchType.toString, _)).toDF()
 
-    timingsDF.write.mode(SaveMode.Append).parquet(s"s3://spark-lucenerdd/timings/v0.0.20/timing-search-${WikipediaUtils.dayString}-${searchInfo.toString()}.parquet")
+    timingsDF.write.mode(SaveMode.Append).parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/timing-search-${WikipediaUtils.dayString}-${searchInfo.toString()}.parquet")
 
   }
 
