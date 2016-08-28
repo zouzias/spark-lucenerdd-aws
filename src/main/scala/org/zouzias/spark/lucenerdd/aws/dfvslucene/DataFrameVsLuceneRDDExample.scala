@@ -27,6 +27,7 @@ object DataFrameVsLuceneRDDExample extends Logging {
     val executorCores = conf.get("spark.executor.cores")
     val executorInstances = conf.get("spark.executor.instances")
     val fieldName = "Country"
+    val k = 10
 
 
     log.info(s"Executor instances: ${executorInstances}")
@@ -37,26 +38,26 @@ object DataFrameVsLuceneRDDExample extends Logging {
     val citiesDF = sqlContext.read.parquet("/Users/taazoan3/recordLinkageData/maxmind/world-cities-maxmind.parquet")
     citiesDF.cache()
     citiesDF.count()
-    val luceneRDD = FacetedLuceneRDD(citiesDF)
+    val luceneRDD = FacetedLuceneRDD(citiesDF.select(fieldName))
     luceneRDD.cache()
     luceneRDD.count()
+    luceneRDD.facetQuery("*:*", fieldName, k)
     logInfo("Cities loaded successfully")
 
-    val k = 10
 
     val dfStart = System.currentTimeMillis()
-    val dfResults = citiesDF.groupBy("Country").count().sort(desc("count")).take(k)
+    val dfResults = citiesDF.groupBy(fieldName).count().sort(desc("count")).take(k)
     val dfEnd = System.currentTimeMillis()
 
     val lucStart =System.currentTimeMillis()
-    val luceneResults = luceneRDD.facetQuery("*:*", "Country", k)
+    val luceneResults = luceneRDD.facetQuery("*:*", fieldName, k)
     val lucEnd =System.currentTimeMillis()
 
 
     println("=" * 10)
-    println(s"DF time: ${dfEnd - dfStart} / 1000 seconds")
+    println(s"DF time: ${ (dfEnd - dfStart) / 1000D } seconds")
     println("=" * 10)
-    println(s"Lucene time: ${lucEnd - lucStart} / 1000 seconds")
+    println(s"Lucene time: ${(lucEnd - lucStart) / 1000D} seconds")
     println("=" * 10)
 
 
