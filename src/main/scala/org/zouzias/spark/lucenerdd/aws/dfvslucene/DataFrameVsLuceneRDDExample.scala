@@ -35,7 +35,7 @@ object DataFrameVsLuceneRDDExample extends Logging {
     log.info(s"Executor memory: ${executorMemory}")
 
     logInfo("Loading Cities")
-    val citiesDF = sqlContext.read.parquet("/Users/taazoan3/recordLinkageData/maxmind/world-cities-maxmind.parquet")
+    val citiesDF = sqlContext.read.parquet("s3://recordlinkage/world-cities-maxmind.parquet")
     citiesDF.cache()
     val total = citiesDF.count()
     logInfo(s"${total} Cities loaded successfully")
