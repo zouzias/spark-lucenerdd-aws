@@ -12,4 +12,4 @@ cd spark-lucenerdd-aws
 sbt compile assembly
 ```
 
-The above JAR is pushed to `s3://spark-lucenerdd/aws/spark-lucenerdd-aws-assembly-0.0.18.jar` and used to generate statistics about the `spark-lucenerdd` project.
+The above JAR is pushed to `s3://spark-lucenerdd/aws/spark-lucenerdd-aws-assembly-X.Y.ZZ.jar` and used to generate statistics about the `spark-lucenerdd` project.
