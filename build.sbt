@@ -1,6 +1,6 @@
 organization := "org.zouzias"
 name := "spark-lucenerdd-aws"
-version := "0.0.21"
+version := "0.0.23"
 scalaVersion := "2.10.6"
 val sparkV = "1.6.2"
 
@@ -13,3 +13,10 @@ libraryDependencies ++= Seq(
 	"org.apache.spark" %% "spark-sql" % sparkV % "provided" ,
 	"org.scala-lang"    % "scala-library" % scalaVersion.value % "compile"
 )
+
+lazy val root = (project in file(".")).
+	enablePlugins(BuildInfoPlugin).
+	settings(
+		buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+		buildInfoPackage := "org.zouzias.spark.lucenerdd.aws"
+	)
