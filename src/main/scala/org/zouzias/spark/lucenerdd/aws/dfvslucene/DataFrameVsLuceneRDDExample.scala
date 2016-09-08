@@ -1,8 +1,8 @@
 package org.zouzias.spark.lucenerdd.aws.dfvslucene
 
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{Row, SQLContext, SaveMode}
 import org.apache.spark.{Logging, SparkConf, SparkContext}
-import org.zouzias.spark.lucenerdd.aws.utils.WikipediaUtils
+import org.zouzias.spark.lucenerdd.aws.utils._
 import org.zouzias.spark.lucenerdd.facets.FacetedLuceneRDD
 import org.zouzias.spark.lucenerdd._
 import org.apache.spark.sql.functions._
@@ -13,22 +13,20 @@ import org.apache.spark.sql.functions._
  */
 object DataFrameVsLuceneRDDExample extends Logging {
 
+  val k = 10
+  val fieldName = "Country"
+
   def main(args: Array[String]) {
 
     // initialise spark context
     val conf = new SparkConf().setAppName(DataFrameVsLuceneRDDExample.getClass.getName)
 
-    //
     implicit val sc = new SparkContext(conf)
     implicit val sqlContext = new SQLContext(sc)
 
-    val today = WikipediaUtils.dayString()
     val executorMemory = conf.get("spark.executor.memory")
     val executorCores = conf.get("spark.executor.cores")
     val executorInstances = conf.get("spark.executor.instances")
-    val fieldName = "Country"
-    val k = 10
-
 
     log.info(s"Executor instances: ${executorInstances}")
     log.info(s"Executor cores: ${executorCores}")
@@ -49,7 +47,6 @@ object DataFrameVsLuceneRDDExample extends Logging {
     luceneRDD.cache()
     luceneRDD.count()
     val lucStart =System.currentTimeMillis()
-    val luceneResults = luceneRDD.facetQuery("*:*", fieldName, k)
     val lucEnd =System.currentTimeMillis()
 
 
@@ -64,6 +61,24 @@ object DataFrameVsLuceneRDDExample extends Logging {
 
     // terminate spark context
     sc.stop()
+
+  }
+
+  def timeLuceneFacetedSearch(luceneRDD: FacetedLuceneRDD[Row], iters: Long, searchInfo: SearchInfo)(implicit sqlContext: SQLContext): Unit = {
+    val timings = (1L until iters).map{ case _ =>
+
+      val start = System.currentTimeMillis()
+      val luceneResults = luceneRDD.facetQuery("*:*", fieldName, k)
+      val end = System.currentTimeMillis()
+
+      Math.max(0L, end - start)
+    }
+
+
+    import sqlContext.implicits._
+    val timingsDF = timings.map(Timing(searchInfo.searchType.toString, _)).toDF()
+
+    timingsDF.write.mode(SaveMode.Append).parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/timing-dfvslucene-${WikipediaUtils.dayString}-${searchInfo.toString()}.parquet")
 
   }
 }
