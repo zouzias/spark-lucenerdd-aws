@@ -8,7 +8,7 @@ HOME_DIR=`echo ~`
 SPARK_HOME=${HOME_DIR}/spark-1.6.2-bin-hadoop2.6
 
 # spark-lucenerdd assembly JAR
-MAIN_JAR=${CURRENT_DIR}/target/scala-2.10/spark-lucenerdd-aws-assembly-0.0.21.jar
+MAIN_JAR=${CURRENT_DIR}/target/scala-2.10/spark-lucenerdd-aws-assembly-0.0.24.jar
 
 # Run spark shell locally
 ${SPARK_HOME}/bin/spark-submit   \
