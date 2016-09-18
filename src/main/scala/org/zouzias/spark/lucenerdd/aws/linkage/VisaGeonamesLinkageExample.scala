@@ -3,7 +3,8 @@ package org.zouzias.spark.lucenerdd.aws.linkage
 import org.apache.spark.sql.{SQLContext, SaveMode}
 import org.apache.spark.{Logging, SparkConf, SparkContext}
 import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, Utils, WikipediaUtils}
-import org.zouzias.spark.lucenerdd.{LuceneRDD, _}
+import org.zouzias.spark.lucenerdd.LuceneRDD
+
 /**
  * H1B visas vs geonames cities linkage example
  */
@@ -14,7 +15,6 @@ object VisaGeonamesLinkageExample extends Logging {
     // initialise spark context
     val conf = new SparkConf().setAppName(VisaGeonamesLinkageExample.getClass.getName)
 
-    //
     implicit val sc = new SparkContext(conf)
     implicit val sqlContext = new SQLContext(sc)
 
@@ -28,6 +28,8 @@ object VisaGeonamesLinkageExample extends Logging {
     log.info(s"Executor instances: ${executorInstances}")
     log.info(s"Executor cores: ${executorCores}")
     log.info(s"Executor memory: ${executorMemory}")
+
+    val start = System.currentTimeMillis()
 
     logInfo("Loading H1B Visa")
     val visa = sqlContext.read.parquet("s3://h1b-visa-enigma.io/enigma-io-h1bvisa.parquet")
@@ -60,7 +62,13 @@ object VisaGeonamesLinkageExample extends Logging {
     val linkedDF = linked.map{ case (left, right) => LinkedRecord(left, right.headOption.map(_.doc.textField(fieldName).toArray))}
       .toDF()
 
-    linkedDF.write.mode(SaveMode.Overwrite).parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-${today}.parquet")
+    val end = System.currentTimeMillis()
+
+    linkedDF.write.mode(SaveMode.Overwrite)
+      .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-result-${today}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
+
+    sc.parallelize(Seq(ElapsedTime(start, end, end - start))).toDF().write.mode(SaveMode.Overwrite)
+      .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-timing-${today}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
 
     // terminate spark context
     sc.stop()
