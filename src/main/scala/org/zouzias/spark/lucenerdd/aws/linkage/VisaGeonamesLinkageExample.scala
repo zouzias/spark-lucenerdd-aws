@@ -62,10 +62,11 @@ object VisaGeonamesLinkageExample extends Logging {
     val linkedDF = linked.map{ case (left, right) => LinkedRecord(left, right.headOption.map(_.doc.textField(fieldName).toArray))}
       .toDF()
 
-    val end = System.currentTimeMillis()
 
     linkedDF.write.mode(SaveMode.Overwrite)
       .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-result-${today}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
+
+    val end = System.currentTimeMillis()
 
     sc.parallelize(Seq(ElapsedTime(start, end, end - start))).toDF().write.mode(SaveMode.Overwrite)
       .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-timing-${today}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
