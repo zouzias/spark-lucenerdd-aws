@@ -44,7 +44,7 @@ object VisaGeonamesLinkageExample extends Logging {
     logInfo("Geonames cities loaded successfully")
 
     val andLinker = (cityName: String) => {
-      val nameTokenized = cityName.split(" ").map(_.replaceAll("[^a-zA-Z0-9]", "")).filter(_.length > 3).mkString(" AND ")
+      val nameTokenized = cityName.split(" ").map(_.replaceAll("[^a-zA-Z0-9]", "")).filter(_.length > 3).mkString(" OR ")
 
       if (nameTokenized.nonEmpty){
         s"${fieldName}:(${nameTokenized})"
