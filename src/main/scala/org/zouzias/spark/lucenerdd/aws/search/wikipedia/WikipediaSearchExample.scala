@@ -1,10 +1,11 @@
 package org.zouzias.spark.lucenerdd.aws.search.wikipedia
 
-import org.apache.spark.sql.{SQLContext, SaveMode}
-import org.apache.spark.{Logging, SparkConf, SparkContext}
+import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.spark.SparkConf
 import org.zouzias.spark.lucenerdd.LuceneRDD
 import org.zouzias.spark.lucenerdd._
 import org.zouzias.spark.lucenerdd.aws.utils._
+import org.zouzias.spark.lucenerdd.logging.Logging
 
 
 /**
@@ -16,10 +17,7 @@ object WikipediaSearchExample extends Logging {
 
     // initialise spark context
     val conf = new SparkConf().setAppName("WikipediaSearchExample")
-
-    //
-    implicit val sc = new SparkContext(conf)
-    implicit val sqlContext = new SQLContext(sc)
+    implicit val spark = SparkSession.builder().config(conf).getOrCreate()
 
     val executorMemory = conf.get("spark.executor.memory")
     val executorCores = conf.get("spark.executor.cores")
@@ -45,11 +43,11 @@ object WikipediaSearchExample extends Logging {
     timeQueries(luceneRDD, wikiSample, SearchInfo(SearchType.PhraseQuery, executorInstances, executorMemory, executorCores))
 
     // terminate spark context
-    sc.stop()
-
+    spark.stop()
   }
 
-  def timeQueries(luceneRDD: LuceneRDD[String], wikiSample: List[String], searchInfo: SearchInfo)(implicit sqlContext: SQLContext): Unit = {
+  def timeQueries(luceneRDD: LuceneRDD[String], wikiSample: List[String], searchInfo: SearchInfo)
+                 (implicit sparkSession: SparkSession): Unit = {
     val timings = wikiSample.map{ case title =>
 
       val start = System.currentTimeMillis()
@@ -65,11 +63,9 @@ object WikipediaSearchExample extends Logging {
     }
 
 
-    import sqlContext.implicits._
+    import sparkSession.implicits._
     val timingsDF = timings.map(Timing(searchInfo.searchType.toString, _)).toDF()
 
     timingsDF.write.mode(SaveMode.Append).parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/timing-search-${WikipediaUtils.dayString}-${searchInfo.toString()}.parquet")
-
   }
-
 }
