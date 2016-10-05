@@ -1,11 +1,12 @@
 package org.zouzias.spark.lucenerdd.aws.dfvslucene
 
-import org.apache.spark.sql.{Row, SQLContext, SaveMode}
-import org.apache.spark.{Logging, SparkConf, SparkContext}
+import org.apache.spark.sql.{Row, SQLContext, SaveMode, SparkSession}
+import org.apache.spark.SparkConf
 import org.zouzias.spark.lucenerdd.aws.utils._
 import org.zouzias.spark.lucenerdd.facets.FacetedLuceneRDD
 import org.zouzias.spark.lucenerdd._
 import org.apache.spark.sql.functions._
+import org.zouzias.spark.lucenerdd.logging.Logging
 
 
 /**
@@ -21,8 +22,7 @@ object DataFrameVsLuceneRDDExample extends Logging {
     // initialise spark context
     val conf = new SparkConf().setAppName(DataFrameVsLuceneRDDExample.getClass.getName)
 
-    implicit val sc = new SparkContext(conf)
-    implicit val sqlContext = new SQLContext(sc)
+    implicit val sparkSession = SparkSession.builder().config(conf).getOrCreate()
 
     val executorMemory = conf.get("spark.executor.memory")
     val executorCores = conf.get("spark.executor.cores")
@@ -33,7 +33,7 @@ object DataFrameVsLuceneRDDExample extends Logging {
     log.info(s"Executor memory: ${executorMemory}")
 
     logInfo("Loading Cities")
-    val citiesDF = sqlContext.read.parquet("s3://recordlinkage/world-cities-maxmind.parquet")
+    val citiesDF = sparkSession.read.parquet("s3://recordlinkage/world-cities-maxmind.parquet")
     citiesDF.cache()
     val total = citiesDF.count()
     logInfo(s"${total} Cities loaded successfully")
@@ -60,11 +60,12 @@ object DataFrameVsLuceneRDDExample extends Logging {
     // linkedDF.write.mode(SaveMode.Overwrite).parquet(s"s3://spark-lucenerdd/timings/v0.0.20/dataframe-vs-lucenerdd-${today}.parquet")
 
     // terminate spark context
-    sc.stop()
+    sparkSession.stop()
 
   }
 
-  def timeLuceneFacetedSearch(luceneRDD: FacetedLuceneRDD[Row], iters: Long, searchInfo: SearchInfo)(implicit sqlContext: SQLContext): Unit = {
+  def timeLuceneFacetedSearch(luceneRDD: FacetedLuceneRDD[Row], iters: Long, searchInfo: SearchInfo)
+                             (implicit sparkSession: SparkSession): Unit = {
     val timings = (1L until iters).map{ case _ =>
 
       val start = System.currentTimeMillis()
@@ -75,7 +76,7 @@ object DataFrameVsLuceneRDDExample extends Logging {
     }
 
 
-    import sqlContext.implicits._
+    import sparkSession.sqlContext.implicits._
     val timingsDF = timings.map(Timing(searchInfo.searchType.toString, _)).toDF()
 
     timingsDF.write.mode(SaveMode.Append).parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/timing-dfvslucene-${WikipediaUtils.dayString}-${searchInfo.toString()}.parquet")
