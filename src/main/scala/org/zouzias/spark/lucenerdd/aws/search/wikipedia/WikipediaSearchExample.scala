@@ -62,7 +62,6 @@ object WikipediaSearchExample extends Logging {
       Math.max(0L, end - start)
     }
 
-
     import sparkSession.implicits._
     val timingsDF = timings.map(Timing(searchInfo.searchType.toString, _)).toDF()
 

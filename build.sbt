@@ -6,6 +6,8 @@ val sparkV = "2.0.0"
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
 
+resolvers += "Apache Repos" at "https://repository.apache.org/content/repositories/releases"
+
 libraryDependencies ++= Seq(
 	"org.zouzias" %% "spark-lucenerdd" % version.value,
 	"joda-time"   % "joda-time"					% "2.9.4",
