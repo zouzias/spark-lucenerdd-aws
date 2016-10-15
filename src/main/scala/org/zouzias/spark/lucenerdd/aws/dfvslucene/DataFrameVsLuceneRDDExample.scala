@@ -47,6 +47,7 @@ object DataFrameVsLuceneRDDExample extends Logging {
     luceneRDD.cache()
     luceneRDD.count()
     val lucStart =System.currentTimeMillis()
+    luceneRDD.facetQuery("*:*", fieldName, facetNum = k)
     val lucEnd =System.currentTimeMillis()
 
 
