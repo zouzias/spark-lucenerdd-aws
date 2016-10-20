@@ -2,8 +2,10 @@
 
 CURRENT_DIR=`pwd`
 
+LUCENERDD_VERSION=`cat version.sbt | awk '{print $5}' | xargs`
+
 # spark-lucenerdd assembly JAR
-MAIN_JAR=${CURRENT_DIR}/target/scala-2.11/spark-lucenerdd-aws-assembly-0.2.1.jar
+MAIN_JAR=${CURRENT_DIR}/target/scala-2.11/spark-lucenerdd-aws-assembly-${LUCENERDD_VERSION}.jar
 
 # Run spark shell locally
 spark-submit   \
