@@ -5,7 +5,6 @@ import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.zouzias.spark.lucenerdd.aws.linkage.ElapsedTime
 import org.zouzias.spark.lucenerdd.aws.utils.{LinkedSpatialRecord, Utils, WikipediaUtils}
 import org.zouzias.spark.lucenerdd.logging.Logging
-import org.zouzias.spark.lucenerdd.spatial.shape.ShapeLuceneRDD
 import org.zouzias.spark.lucenerdd.spatial.shape._
 import org.zouzias.spark.lucenerdd._
 
