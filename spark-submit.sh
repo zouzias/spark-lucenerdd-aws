@@ -16,7 +16,7 @@ HOME_DIR=`echo ~`
 SPARK_HOME=${HOME_DIR}/spark-1.6.2-bin-hadoop2.6
 
 # spark-lucenerdd assembly JAR
-MAIN_JAR=${CURRENT_DIR}/target/scala-2.10/spark-lucenerdd-aws-assembly-${SPARK_LUCENERDD_VERSION}.jar
+MAIN_JAR=${CURRENT_DIR}/target/scala-2.11/spark-lucenerdd-aws-assembly-${SPARK_LUCENERDD_VERSION}.jar
 
 # Run spark shell locally
 # Run spark shell locally
