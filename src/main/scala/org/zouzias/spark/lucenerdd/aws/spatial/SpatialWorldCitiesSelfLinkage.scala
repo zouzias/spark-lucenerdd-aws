@@ -13,6 +13,10 @@ import org.zouzias.spark.lucenerdd._
  */
 object SpatialWorldCitiesSelfLinkage extends Logging {
 
+    def coord(x:((Double, Double), (String, String))): (Double, Double) = {
+      x._1
+    }
+
     def main(args: Array[String]) {
 
       // initialise spark context
@@ -49,16 +53,13 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
       shapes.count
       logInfo("Max mind cities loaded successfully")
 
-      def coord(x:((Double, Double), (String, String))): (Double, Double) = {
-        x._1
-      }
-
       // Link and fetch top-3
       val linkage = shapes.linkByRadius(cities.rdd, coord, 3)
 
 
       import spark.implicits._
-      val linkedDF = spark.createDataFrame(linkage.map{ case (left, right) => LinkedSpatialRecord(left._2, right.headOption.flatMap(_.doc.textField(fieldName)))})
+      val asCaseClass =linkage.map{ case (left, right) => LinkedSpatialRecord(left._2, right.headOption.flatMap(_.doc.textField(fieldName)))}
+      val linkedDF = spark.createDataFrame(asCaseClass)
 
       linkedDF.write.mode(SaveMode.Overwrite)
         .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/max-mind-cities-linkage-result-${today}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
