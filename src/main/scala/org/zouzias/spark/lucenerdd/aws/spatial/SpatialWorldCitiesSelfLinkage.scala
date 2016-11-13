@@ -49,8 +49,12 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
       shapes.count
       logInfo("Max mind cities loaded successfully")
 
+      def coord(x:((Double, Double), (String, String))): (Double, Double) = {
+        x._1
+      }
+
       // Link and fetch top-3
-      val linkage = shapes.linkByRadius(cities.rdd, {x:((Double, Double), (String, String)) => x._1}, 3)
+      val linkage = shapes.linkByRadius(cities.rdd, coord, 3)
 
 
       import spark.implicits._
