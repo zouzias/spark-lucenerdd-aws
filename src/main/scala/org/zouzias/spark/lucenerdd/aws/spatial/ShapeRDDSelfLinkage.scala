@@ -5,19 +5,18 @@ import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.zouzias.spark.lucenerdd.aws.linkage.ElapsedTime
 import org.zouzias.spark.lucenerdd.aws.utils.{LinkedSpatialRecord, Utils, WikipediaUtils}
 import org.zouzias.spark.lucenerdd.logging.Logging
-import org.zouzias.spark.lucenerdd.spatial.shape.rdds.ShapeLuceneRDD
 import org.zouzias.spark.lucenerdd.spatial.shape._
-import org.zouzias.spark.lucenerdd._
+import org.zouzias.spark.lucenerdd.spatial.shape.rdds.ShapeRDD
 
 /**
  * Spatial world cities self-linkage
  */
-object SpatialWorldCitiesSelfLinkage extends Logging {
+object ShapeRDDSelfLinkage extends Logging {
 
     def main(args: Array[String]) {
 
       // initialise spark context
-      val conf = new SparkConf().setAppName(SpatialWorldCitiesSelfLinkage.getClass.getName)
+      val conf = new SparkConf().setAppName(ShapeRDDSelfLinkage.getClass.getName)
 
       implicit val spark = SparkSession.builder().config(conf).getOrCreate()
       import spark.implicits._
@@ -44,7 +43,7 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
         .map(row => ((row.getString(1).toDouble, row.getString(0).toDouble), (row.getString(2), row.getString(3))))
 
 
-      val shapes = ShapeLuceneRDD(cities)
+      val shapes = ShapeRDD(cities)
 
       shapes.cache
       shapes.count
