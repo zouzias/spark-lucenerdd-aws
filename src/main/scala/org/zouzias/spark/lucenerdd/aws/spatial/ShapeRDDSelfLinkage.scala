@@ -58,7 +58,7 @@ object ShapeRDDSelfLinkage extends Logging {
 
 
       import spark.implicits._
-      val asCaseClass =linkage.map{ case (left, right) => LinkedSpatialRecord(left._2, right.headOption.flatMap(_.doc.textField(fieldName)))}
+      val asCaseClass = shapes.postLinker(linkage).map{ case (left, right) => LinkedSpatialRecord(left._2, right.headOption.flatMap(_.doc.textField(fieldName)))}
       val linkedDF = spark.createDataFrame(asCaseClass)
 
       linkedDF.write.mode(SaveMode.Overwrite)
