@@ -49,7 +49,7 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
       shapes.count
       logInfo("Max mind cities loaded successfully")
 
-      val coord = { x:((Double, Double), (String, String)) =>
+      val coord = (x: ((Double, Double), (String, String))) => {
         x._1
       }
 
