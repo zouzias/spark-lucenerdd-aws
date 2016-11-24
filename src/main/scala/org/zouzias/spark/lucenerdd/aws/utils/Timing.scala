@@ -1,3 +1,3 @@
 package org.zouzias.spark.lucenerdd.aws.utils
 
-case class Timing(searchType: String, elapsedTime: Long)
+case class Timing(searchType: String, elapsedTime: Long, day: String, version: String)

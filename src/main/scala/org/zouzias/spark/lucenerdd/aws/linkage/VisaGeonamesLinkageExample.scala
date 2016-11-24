@@ -2,12 +2,12 @@ package org.zouzias.spark.lucenerdd.aws.linkage
 
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.SparkConf
-import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, Utils, WikipediaUtils}
+import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, Utils}
 import org.zouzias.spark.lucenerdd.LuceneRDD
 import org.zouzias.spark.lucenerdd.logging.Logging
 
 /**
- * H1B visas vs geonames cities linkage example
+ * H1B visas vs Geoname cities linkage example
  */
 object VisaGeonamesLinkageExample extends Logging {
 
@@ -19,7 +19,7 @@ object VisaGeonamesLinkageExample extends Logging {
     implicit val spark = SparkSession.builder().config(conf).getOrCreate()
     import spark.implicits._
 
-    val today = WikipediaUtils.dayString()
+    val today = Utils.dayString()
     val executorMemory = conf.get("spark.executor.memory")
     val executorCores = conf.get("spark.executor.cores")
     val executorInstances = conf.get("spark.executor.instances")
@@ -47,16 +47,10 @@ object VisaGeonamesLinkageExample extends Logging {
     val andLinker = (cityName: String) => {
       val nameTokenized = cityName.split(" ").map(_.replaceAll("[^a-zA-Z0-9]", "")).filter(_.length > 3).mkString(" AND ")
 
-      if (nameTokenized.nonEmpty){
-        s"${fieldName}:(${nameTokenized})"
-      }
-      else {
-        "*:*"
-      }
+      if (nameTokenized.nonEmpty)s"${fieldName}:(${nameTokenized})" else "*:*"
     }
 
     val linked = luceneRDD.link(cities.rdd, andLinker, 5)
-
     linked.cache
 
     import spark.implicits._
@@ -67,8 +61,8 @@ object VisaGeonamesLinkageExample extends Logging {
 
     val end = System.currentTimeMillis()
 
-    spark.createDataFrame(Seq(ElapsedTime(start, end, end - start))).write.mode(SaveMode.Overwrite)
-      .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-timing-${today}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
+    spark.createDataFrame(Seq(ElapsedTime(start, end, end - start, today, Utils.Version))).write.mode(SaveMode.Overwrite)
+      .parquet(s"s3://spark-lucenerdd/timings/visa-vs-geonames-linkage-timing-${executorMemory}-${executorInstances}-${executorCores}.parquet")
 
     // terminate spark context
     spark.stop()

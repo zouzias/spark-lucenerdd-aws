@@ -3,10 +3,11 @@ package org.zouzias.spark.lucenerdd.aws.spatial
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.zouzias.spark.lucenerdd.aws.linkage.ElapsedTime
-import org.zouzias.spark.lucenerdd.aws.utils.{LinkedSpatialRecord, Utils, WikipediaUtils}
+import org.zouzias.spark.lucenerdd.aws.utils.{LinkedSpatialRecord, Utils}
 import org.zouzias.spark.lucenerdd.logging.Logging
 import org.zouzias.spark.lucenerdd.spatial.shape._
 import org.zouzias.spark.lucenerdd._
+import org.zouzias.spark.lucenerdd.spatial.shape.rdds.ShapeLuceneRDD
 
 /**
  * Spatial world cities self-linkage
@@ -21,7 +22,7 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
       implicit val spark = SparkSession.builder().config(conf).getOrCreate()
       import spark.implicits._
 
-      val today = WikipediaUtils.dayString()
+      val today = Utils.dayString()
       val executorMemory = conf.get("spark.executor.memory")
       val executorCores = conf.get("spark.executor.cores")
       val executorInstances = conf.get("spark.executor.instances")
@@ -66,8 +67,8 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
 
       val end = System.currentTimeMillis()
 
-      spark.createDataFrame(Seq(ElapsedTime(start, end, end - start))).write.mode(SaveMode.Overwrite)
-        .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/max-mind-cities-linkage-timing-${today}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
+      spark.createDataFrame(Seq(ElapsedTime(start, end, end - start, today, Utils.Version))).write.mode(SaveMode.Overwrite)
+        .parquet(s"s3://spark-lucenerdd/timings/max-mind-cities-linkage-timing-${executorMemory}-${executorInstances}-${executorCores}.parquet")
 
       // terminate spark context
       spark.stop()

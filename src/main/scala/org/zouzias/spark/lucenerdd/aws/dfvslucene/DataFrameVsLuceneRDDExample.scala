@@ -65,7 +65,7 @@ object DataFrameVsLuceneRDDExample extends Logging {
 
   }
 
-  def timeLuceneFacetedSearch(luceneRDD: FacetedLuceneRDD[Row], iters: Long, searchInfo: SearchInfo)
+  def timeLuceneFacetedSearch(luceneRDD: FacetedLuceneRDD[Row], iters: Long, searchInfo: SparkInfo)
                              (implicit sparkSession: SparkSession): Unit = {
     val timings = (1L until iters).map{ case _ =>
 
@@ -78,9 +78,9 @@ object DataFrameVsLuceneRDDExample extends Logging {
 
 
     import sparkSession.sqlContext.implicits._
-    val timingsDF = timings.map(Timing(searchInfo.searchType.toString, _)).toDF()
+    val timingsDF = timings.map(Timing(SearchType.TermQuery.toString, _, Utils.dayString(), Utils.Version)).toDF()
 
-    timingsDF.write.mode(SaveMode.Append).parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/timing-dfvslucene-${WikipediaUtils.dayString}-${searchInfo.toString()}.parquet")
+    timingsDF.write.mode(SaveMode.Append).parquet(s"s3://spark-lucenerdd/timings/timing-dfvslucene-${searchInfo.toString()}.parquet")
 
   }
 }
