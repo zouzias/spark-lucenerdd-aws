@@ -7,7 +7,6 @@ import org.zouzias.spark.lucenerdd.aws.utils.{LinkedSpatialRecord, Utils}
 import org.zouzias.spark.lucenerdd.logging.Logging
 import org.zouzias.spark.lucenerdd.spatial.shape._
 import org.zouzias.spark.lucenerdd._
-import org.zouzias.spark.lucenerdd.spatial.shape.rdds.ShapeLuceneRDD
 
 /**
  * Spatial world cities self-linkage
