@@ -34,7 +34,7 @@ object WikipediaPagesIndexingExample extends Logging {
 
     import spark.implicits._
     val wiki = spark.read.parquet("s3://spark-lucenerdd/wikipedia/enwiki-pages-20161124.parquet")
-        .select("paragraphs").map(row => row.getAs[mutable.WrappedArray[String]](0).mkString(" ")).map(_.replaceAll("_", " ")).map(_.replaceAll("[^a-zA-Z0-9\\s]", ""))
+        .select("paragraphs").flatMap(row => Option(row.getAs[mutable.WrappedArray[String]](0)).map(_.mkString(" "))).map(_.replaceAll("_", " ")).map(_.replaceAll("[^a-zA-Z0-9\\s]", ""))
       .rdd
 
     logInfo("Wikipedia titles loaded successfully")
