@@ -6,6 +6,8 @@ import org.zouzias.spark.lucenerdd.aws.utils._
 import org.zouzias.spark.lucenerdd.logging.Logging
 import org.zouzias.spark.lucenerdd.{LuceneRDD, _}
 
+import scala.collection.mutable
+
 
 /**
  * Wikipedia indexing performance test
@@ -32,7 +34,7 @@ object WikipediaPagesIndexingExample extends Logging {
 
     import spark.implicits._
     val wiki = spark.read.parquet("s3://spark-lucenerdd/wikipedia/enwiki-pages-20161124.parquet")
-        .select("paragraphs").map(row => row.getString(0)).map(_.replaceAll("_", " ")).map(_.replaceAll("[^a-zA-Z0-9\\s]", ""))
+        .select("paragraphs").map(row => row.getAs[mutable.WrappedArray[String]](0).mkString(" ")).map(_.replaceAll("_", " ")).map(_.replaceAll("[^a-zA-Z0-9\\s]", ""))
       .rdd
 
     logInfo("Wikipedia titles loaded successfully")
