@@ -23,5 +23,5 @@ spark-submit   \
 	 --conf spark.driver.extraJavaOptions="-Dlucenerdd.index.store.mode=disk" \
 	 --master yarn \
 	 --deploy-mode client \
-	 --class org.zouzias.spark.lucenerdd.aws.spatial.SpatialWorldCitiesSelfLinkage \
+	 --class org.zouzias.spark.lucenerdd.aws.indexing.WikipediaIndexingExample \
 	 "${MAIN_JAR}"
