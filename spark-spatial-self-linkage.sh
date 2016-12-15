@@ -14,9 +14,9 @@ MAIN_JAR=${CURRENT_DIR}/target/scala-2.11/spark-lucenerdd-aws-assembly-${SPARK_L
 # Run spark shell locally
 # Run spark shell locally
 spark-submit   \
-	 --driver-memory 2g \
+	 --driver-memory 4g \
 	 --executor-memory 4g \
-	 --conf spark.executor.instances=4 \
+	 --conf spark.executor.instances=10 \
 	 --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
 	 --conf spark.kryo.registrator=org.zouzias.spark.lucenerdd.spatial.shape.ShapeLuceneRDDKryoRegistrator \
 	 --conf spark.executor.extraJavaOptions="-Dlucenerdd.index.store.mode=disk" \
