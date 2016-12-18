@@ -56,7 +56,7 @@ object VisaGeonamesLinkageExample extends Logging {
     linked.cache
 
     import spark.implicits._
-    val linkedDF = spark.createDataFrame(linked.map{ case (left, right) => LinkedRecord(left, right.headOption.map(_.doc.textField(fieldName).toArray, today))})
+    val linkedDF = spark.createDataFrame(linked.map{ case (left, right) => LinkedRecord(left, right.headOption.map(_.doc.textField(fieldName).toArray), today)})
 
     linkedDF.write.mode(SaveMode.Overwrite)
       .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-result-${sparkInfo.toString}.parquet")
