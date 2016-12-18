@@ -2,7 +2,7 @@ package org.zouzias.spark.lucenerdd.aws.linkage
 
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.SparkConf
-import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, Utils}
+import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, SparkInfo, Utils}
 import org.zouzias.spark.lucenerdd.LuceneRDD
 import org.zouzias.spark.lucenerdd.logging.Logging
 
@@ -29,6 +29,8 @@ object VisaGeonamesLinkageExample extends Logging {
     log.info(s"Executor instances: ${executorInstances}")
     log.info(s"Executor cores: ${executorCores}")
     log.info(s"Executor memory: ${executorMemory}")
+    val sparkInfo = SparkInfo(executorInstances, executorMemory, executorCores)
+
 
     val start = System.currentTimeMillis()
 
@@ -54,15 +56,15 @@ object VisaGeonamesLinkageExample extends Logging {
     linked.cache
 
     import spark.implicits._
-    val linkedDF = spark.createDataFrame(linked.map{ case (left, right) => LinkedRecord(left, right.headOption.map(_.doc.textField(fieldName).toArray))})
+    val linkedDF = spark.createDataFrame(linked.map{ case (left, right) => LinkedRecord(left, right.headOption.map(_.doc.textField(fieldName).toArray, today))})
 
     linkedDF.write.mode(SaveMode.Overwrite)
-      .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-result-${today}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
+      .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/visa-vs-geonames-linkage-result-${sparkInfo.toString}.parquet")
 
     val end = System.currentTimeMillis()
 
     spark.createDataFrame(Seq(ElapsedTime(start, end, end - start, today, Utils.Version))).write.mode(SaveMode.Overwrite)
-      .parquet(s"s3://spark-lucenerdd/timings/visa-vs-geonames-linkage-timing-${executorMemory}-${executorInstances}-${executorCores}.parquet")
+      .parquet(s"s3://spark-lucenerdd/timings/visa-vs-geonames-linkage-timing-${sparkInfo.toString}.parquet")
 
     // terminate spark context
     spark.stop()

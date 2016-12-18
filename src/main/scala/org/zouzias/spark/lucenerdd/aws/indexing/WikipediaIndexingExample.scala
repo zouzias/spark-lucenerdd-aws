@@ -9,6 +9,8 @@ import org.zouzias.spark.lucenerdd.logging.Logging
 
 /**
  * Wikipedia indexing performance test
+ *
+ * This test index only the titles of all wikipedia articles
  */
 object WikipediaIndexingExample extends Logging {
 

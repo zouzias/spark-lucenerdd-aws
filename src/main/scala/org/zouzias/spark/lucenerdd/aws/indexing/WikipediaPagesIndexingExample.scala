@@ -11,6 +11,8 @@ import scala.collection.mutable
 
 /**
  * Wikipedia indexing performance test
+ *
+ * It index all paragraphs of wikipedia articles
  */
 object WikipediaPagesIndexingExample extends Logging {
 
