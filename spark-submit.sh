@@ -13,7 +13,7 @@ echo "==============================================="
 HOME_DIR=`echo ~`
 
 #export SPARK_LOCAL_IP=localhost
-SPARK_HOME=${HOME_DIR}/spark-1.6.2-bin-hadoop2.6
+SPARK_HOME=${HOME_DIR}/spark-2.1.0-bin-hadoop2.7
 
 # spark-lucenerdd assembly JAR
 MAIN_JAR=${CURRENT_DIR}/target/scala-2.11/spark-lucenerdd-aws-assembly-${SPARK_LUCENERDD_VERSION}.jar
