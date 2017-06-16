@@ -62,11 +62,11 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
       val linkedDF = spark.createDataFrame(asCaseClass)
 
       linkedDF.write.mode(SaveMode.Overwrite)
-        .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/max-mind-cities-linkage-result-${today}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
+        .parquet(s"s3://spark-lucenerdd/timings/max-mind-cities-linkage-result-${today}-${Utils.Version}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
 
       val end = System.currentTimeMillis()
 
-      spark.createDataFrame(Seq(ElapsedTime(start, end, end - start, today, Utils.Version))).write.mode(SaveMode.Overwrite)
+      spark.createDataFrame(Seq(ElapsedTime(start, end, end - start, today, Utils.Version))).write.mode(SaveMode.Append)
         .parquet(s"s3://spark-lucenerdd/timings/max-mind-cities-linkage-timing-${executorMemory}-${executorInstances}-${executorCores}.parquet")
 
       // terminate spark context
