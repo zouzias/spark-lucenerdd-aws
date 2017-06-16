@@ -63,7 +63,7 @@ object VisaGeonamesLinkageExample extends Logging {
 
     val end = System.currentTimeMillis()
 
-    spark.createDataFrame(Seq(ElapsedTime(start, end, end - start, today, Utils.Version))).write.mode(SaveMode.Overwrite)
+    spark.createDataFrame(Seq(ElapsedTime(start, end, end - start, today, Utils.Version))).write.mode(SaveMode.Append)
       .parquet(s"s3://spark-lucenerdd/timings/visa-vs-geonames-linkage-timing-${sparkInfo.toString}.parquet")
 
     // terminate spark context
