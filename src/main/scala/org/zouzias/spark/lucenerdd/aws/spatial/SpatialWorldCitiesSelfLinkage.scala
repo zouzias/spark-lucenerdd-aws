@@ -39,8 +39,7 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
       val total = citiesDF.count
       logInfo(s"Cities: ${total}")
 
-      val cities = citiesDF.select("Latitude", "Longitude", "City", "Country")
-        .map(row => ((row.getString(1).toDouble, row.getString(0).toDouble), (row.getString(2), row.getString(3))))
+      val cities = citiesDF.select("Latitude", "Longitude", "City", "Country").map(row => ((row.getString(1).toDouble, row.getString(0).toDouble), (row.getString(2), row.getString(3))))
 
 
       val shapes = ShapeLuceneRDD(cities)
@@ -61,7 +60,7 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
       val asCaseClass =linkage.map{ case (left, right) => LinkedSpatialRecord(left._2, right.headOption.flatMap(_.doc.textField(fieldName)))}
       val linkedDF = spark.createDataFrame(asCaseClass)
 
-      linkedDF.write.mode(SaveMode.Overwrite)
+      linkedDF.write.mode(SaveMode.Append)
         .parquet(s"s3://spark-lucenerdd/timings/max-mind-cities-linkage-result-${today}-${Utils.Version}-${executorMemory}-${executorInstances}-${executorCores}.parquet")
 
       val end = System.currentTimeMillis()
