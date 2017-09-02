@@ -36,13 +36,15 @@ object VisaGeonamesLinkageExample extends Logging {
 
     logInfo("Loading H1B Visa")
     val visa = spark.read.parquet("s3://h1b-visa-enigma.io/enigma-io-h1bvisa.parquet")
+                  .repartition(5)
+
     val luceneRDD = LuceneRDD(visa.select(fieldName))
     luceneRDD.cache()
     logInfo("H1B Visas loaded successfully")
 
     logInfo("Loading Geonames Cities")
     val citiesDF = spark.read.parquet("s3://recordlinkage/geonames-usa-cities.parquet")
-    val cities = citiesDF.flatMap(row => Option(row.getString(1)))
+    val cities = citiesDF.flatMap(row => Option(row.getString(1))).repartition(5)
     cities.cache()
     logInfo("Geonames cities loaded successfully")
 
