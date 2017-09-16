@@ -20,6 +20,7 @@ spark-submit   \
 	 --driver-memory 2g \
 	 --executor-memory 4g \
 	 --conf spark.executor.instances=4 \
+         --conf spark.dynamicAllocation.enabled=false \
 	 --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
 	 --conf spark.kryo.registrator=org.zouzias.spark.lucenerdd.LuceneRDDKryoRegistrator \
 	 --conf spark.executor.extraJavaOptions="-Dlucenerdd.index.store.mode=disk" \
