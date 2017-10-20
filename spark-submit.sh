@@ -12,18 +12,15 @@ echo "==============================================="
 # Assumes that spark is installed under home directory
 HOME_DIR=`echo ~`
 
-#export SPARK_LOCAL_IP=localhost
-SPARK_HOME=${HOME_DIR}/spark-2.1.0-bin-hadoop2.7
-
 # spark-lucenerdd assembly JAR
 MAIN_JAR=${CURRENT_DIR}/target/scala-2.11/spark-lucenerdd-aws-assembly-${SPARK_LUCENERDD_VERSION}.jar
 
-# Run spark shell locally
-# Run spark shell locally
+# Run spark submit
 spark-submit   \
 	 --driver-memory 2g \
 	 --executor-memory 4g \
 	 --conf spark.executor.instances=4 \
+         --conf spark.dynamicAllocation.enabled=false \
 	 --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
 	 --conf spark.kryo.registrator=org.zouzias.spark.lucenerdd.LuceneRDDKryoRegistrator \
 	 --conf spark.executor.extraJavaOptions="-Dlucenerdd.index.store.mode=disk" \

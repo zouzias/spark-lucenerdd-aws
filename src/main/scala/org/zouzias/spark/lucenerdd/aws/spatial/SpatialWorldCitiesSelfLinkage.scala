@@ -34,7 +34,7 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
 
       val start = System.currentTimeMillis()
 
-      val citiesDF = spark.read.parquet("s3://recordlinkage/world-cities-maxmind.parquet").repartition(60)
+      val citiesDF = spark.read.parquet("s3://recordlinkage/world-cities-maxmind.parquet").repartition(5)
       citiesDF.cache
       val total = citiesDF.count
       logInfo(s"Cities: ${total}")

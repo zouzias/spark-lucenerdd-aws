@@ -12,4 +12,12 @@ cd spark-lucenerdd-aws
 sbt compile assembly
 ```
 
-The above JAR is pushed to `s3://spark-lucenerdd/aws/spark-lucenerdd-aws-assembly-X.Y.ZZ.jar` and used to generate statistics about the `spark-lucenerdd` project.
+The above JAR is pushed to `s3://spark-lucenerdd/aws/spark-lucenerdd-aws-assembly-X.Y.Z.jar` and used to generate statistics about the `spark-lucenerdd` project.
+
+
+### Install sbt on aws EMR machines
+
+```
+curl https://bintray.com/sbt/rpm/rpm | sudo tee /etc/yum.repos.d/bintray-sbt-rpm.repo
+sudo yum install -y sbt
+```
