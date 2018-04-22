@@ -20,7 +20,7 @@ object WikipediaPagesIndexingExample extends Logging {
 
     // initialise spark context
     val conf = new SparkConf().setAppName("WikipediaPagesIndexingExample")
-    implicit val spark = SparkSession.builder().config(conf).getOrCreate()
+    implicit val spark: SparkSession = SparkSession.builder().config(conf).getOrCreate()
 
     val today = Utils.dayString()
     val executorMemory = conf.get("spark.executor.memory")

@@ -16,7 +16,7 @@ object VisaGeonamesLinkageExample extends Logging {
     // initialise spark context
     val conf = new SparkConf().setAppName(VisaGeonamesLinkageExample.getClass.getName)
 
-    implicit val spark = SparkSession.builder().config(conf).getOrCreate()
+    implicit val spark: SparkSession = SparkSession.builder().config(conf).getOrCreate()
     import spark.implicits._
 
     val today = Utils.dayString()

@@ -18,7 +18,7 @@ object WikipediaSearchExample extends Logging {
 
     // initialise spark context
     val conf = new SparkConf().setAppName("WikipediaSearchExample")
-    implicit val spark = SparkSession.builder().config(conf).getOrCreate()
+    implicit val spark: SparkSession = SparkSession.builder().config(conf).getOrCreate()
 
     val executorMemory = conf.get("spark.executor.memory")
     val executorCores = conf.get("spark.executor.cores")

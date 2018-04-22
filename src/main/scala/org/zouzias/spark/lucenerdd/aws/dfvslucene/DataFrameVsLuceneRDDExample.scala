@@ -22,7 +22,7 @@ object DataFrameVsLuceneRDDExample extends Logging {
     // initialise spark context
     val conf = new SparkConf().setAppName(DataFrameVsLuceneRDDExample.getClass.getName)
 
-    implicit val sparkSession = SparkSession.builder().config(conf).getOrCreate()
+    implicit val sparkSession: SparkSession = SparkSession.builder().config(conf).getOrCreate()
 
     val executorMemory = conf.get("spark.executor.memory")
     val executorCores = conf.get("spark.executor.cores")
