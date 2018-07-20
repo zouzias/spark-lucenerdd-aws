@@ -1,22 +1,15 @@
 #!/usr/bin/env bash
 
-
-INSTANCE_TYPE="r3.xlarge"
-INSTANCE_COUNT=5
-EXECUTOR_INSTANCES=5
-EXECUTOR_MEMORY="9g"
-AWS_REGION="eu-central-1"
-LUCENERDD_VERSION="0.0.24"
-
+AWS_REGION="eu-west-1"
 
 aws emr create-cluster --applications Name=Hadoop Name=Spark \
-	--ec2-attributes '{"KeyName":"aws-amazon","InstanceProfile":"EMR_EC2_DefaultRole","SubnetId":"subnet-26648d5d","EmrManagedSlaveSecurityGroup":"sg-d4e85abd","EmrManagedMasterSecurityGroup":"sg-d5e85abc"}' \
-	--service-role EMR_DefaultRole \
-	--enable-debugging \
-	--release-label emr-4.7.2 \
-	--log-uri 's3n://aws-logs-438094089491-eu-central-1/elasticmapreduce/' \
-	--steps "[{\"Args\":[\"spark-submit\",\"--deploy-mode\",\"cluster\",\"--conf\",\"spark.rdd.compress=true\",\"--conf\",\"spark.executor.memory=${EXECUTOR_MEMORY}\",\"--conf\",\"spark.executor.instances=${EXECUTOR_INSTANCES}\",\"--conf\",\"spark.serializer=org.apache.spark.serializer.KryoSerializer\",\"--conf\",\"spark.kryo.registrator=org.zouzias.spark.lucenerdd.LuceneRDDKryoRegistrator\",\"--class\",\"org.zouzias.spark.lucenerdd.aws.linkage.VisaGeonamesLinkageExample\",\"s3://spark-lucenerdd/aws/spark-lucenerdd-aws-assembly-${LUCENERDD_VERSION}.jar\"],\"Type\":\"CUSTOM_JAR\",\"ActionOnFailure\":\"TERMINATE_CLUSTER\",\"Jar\":\"command-runner.jar\",\"Properties\":\"\",\"Name\":\"Spark application (spark-lucenerdd-aws)\"}]" \
-    --name "LuceneRDD (linkage v${LUCENERDD_VERSION} - ${EXECUTOR_INSTANCES} executors - ${INSTANCE_COUNT} instances)" \
-	--instance-groups "[{\"InstanceCount\":1,\"InstanceGroupType\":\"MASTER\",\"InstanceType\":\"m3.xlarge\",\"Name\": \"Master instance group - 1\"},{\"InstanceCount\": ${INSTANCE_COUNT} , \"InstanceGroupType\": \"CORE\", \"InstanceType\": \"${INSTANCE_TYPE}\" , \"Name\" : \"Core instance group - 2\"}]" \
+    --ec2-attributes '{"KeyName":"aws-ireland-ec2","InstanceProfile":"EMR_EC2_DefaultRole","SubnetId":"subnet-12af7876","EmrManagedSlaveSecurityGroup":"sg-3bfd315c","EmrManagedMasterSecurityGroup":"sg-3cfd315b"}' \
+    --release-label emr-5.16.0 \
+    --log-uri 's3n://aws-logs-438094089491-eu-west-1/elasticmapreduce/' \
+    --steps '[{"Args":["spark-submit","--deploy-mode","cluster","--driver-memory","8g","--executor-memory","8g","--conf","spark.executor.instances=4","--conf","spark.dynamicAllocation.enabled=false","--conf","spark.serializer=org.apache.spark.serializer.KryoSerializer","--conf","spark.kryo.registrator=org.zouzias.spark.lucenerdd.LuceneRDDKryoRegistrator","--conf","spark.executor.extraJavaOptions=-Dlucenerdd.index.store.mode=disk","--conf","spark.driver.extraJavaOptions=-Dlucenerdd.index.store.mode=disk","--class","org.zouzias.spark.lucenerdd.aws.linkage.blocked.LinkageBlockGeonamesExample","s3://spark-lucenerdd/2.11/spark-lucenerdd-aws-assembly-0.3.3-SNAPSHOT.jar"],"Type":"CUSTOM_JAR","ActionOnFailure":"TERMINATE_CLUSTER","Jar":"command-runner.jar","Properties":"","Name":"LuceneRDD Deduplication Spark Job"}]' --instance-groups '[{"InstanceCount":1,"EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"SizeInGB":32,"VolumeType":"gp2"},"VolumesPerInstance":1}]},"InstanceGroupType":"MASTER","InstanceType":"m4.large","Name":"Master - 1"},{"InstanceCount":5,"EbsConfiguration":{"EbsBlockDeviceConfigs":[{"VolumeSpecification":{"SizeInGB":32,"VolumeType":"gp2"},"VolumesPerInstance":1}]},"InstanceGroupType":"CORE","InstanceType":"r3.xlarge","Name":"Core - 2"}]' \
     --auto-terminate \
-	--region ${AWS_REGION}
+    --auto-scaling-role EMR_AutoScaling_DefaultRole \
+    --service-role EMR_DefaultRole \
+    --name 'My cluster' \
+    --scale-down-behavior TERMINATE_AT_TASK_COMPLETION \
+    --region ${AWS_REGION}
