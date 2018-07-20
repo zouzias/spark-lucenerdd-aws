@@ -17,7 +17,7 @@ object LinkageBlockGeonamesExample extends Logging {
   def main(args: Array[String]) {
 
     // initialise spark context
-    val conf = new SparkConf().setAppName(LinkageBlockGeonamesExample.getClass.getName)
+    val conf = new SparkConf().setAppName("LinkageBlockGeonamesExample")
 
     implicit val spark: SparkSession = SparkSession.builder().config(conf).getOrCreate()
     import spark.implicits._
@@ -26,7 +26,7 @@ object LinkageBlockGeonamesExample extends Logging {
     val executorMemory = conf.get("spark.executor.memory")
     val executorCores = conf.get("spark.executor.cores")
     val executorInstances = conf.get("spark.executor.instances")
-    val fieldName = "lca_case_employer_city"
+    val fieldName = "name"
 
     log.info(s"Executor instances: $executorInstances")
     log.info(s"Executor cores: $executorCores")
@@ -40,18 +40,18 @@ object LinkageBlockGeonamesExample extends Logging {
     val citiesDF = spark.read.parquet("s3://recordlinkage/geonames-usa-cities.parquet")
 
     val andLinker = (row: Row) => {
-      val cityName = row.getString(row.fieldIndex("name"))
-      val nameTokenized = cityName.split(" ").map(_.replaceAll("[^a-zA-Z0-9]", "")).filter(_.length > 3).mkString(" AND ")
+      val cityName = row.getString(row.fieldIndex(fieldName))
+      val nameTokenized = cityName.split(" ").map(_.replaceAll("[^a-zA-Z0-9]", "")).filter(_.length > 3).mkString(" OR ")
 
       if (nameTokenized.nonEmpty) s"$fieldName:($nameTokenized)" else "*:*"
     }
 
-    val linked = LuceneRDD.blockDedup(citiesDF, andLinker, Array("country code"))
+    val linked = LuceneRDD.blockDedup(citiesDF, andLinker, Array("featureclass"))
 
 
     val linkedDF = linked.map{ case (l, r) =>
-      val docs = r.flatMap(_.doc.textField("name")).toArray
-      LinkedRecord(l.getString(l.fieldIndex("name")),
+      val docs = r.flatMap(_.doc.textField(fieldName)).toArray
+      LinkedRecord(l.getString(l.fieldIndex(fieldName)),
         Some(docs),
         today)
     }.toDF()
