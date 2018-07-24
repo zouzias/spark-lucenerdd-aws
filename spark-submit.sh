@@ -17,8 +17,8 @@ MAIN_JAR=${CURRENT_DIR}/target/scala-2.11/spark-lucenerdd-aws-assembly-${SPARK_L
 
 # Run spark submit
 spark-submit   \
-	 --driver-memory 2g \
-	 --executor-memory 4g \
+	 --driver-memory 8g \
+	 --executor-memory 8g \
 	 --conf spark.executor.instances=4 \
          --conf spark.dynamicAllocation.enabled=false \
 	 --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
