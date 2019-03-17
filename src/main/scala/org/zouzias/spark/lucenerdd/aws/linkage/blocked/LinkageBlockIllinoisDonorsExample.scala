@@ -1,11 +1,17 @@
 package org.zouzias.spark.lucenerdd.aws.linkage.blocked
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
+import org.apache.lucene.index.Term
+import org.apache.lucene.search.BooleanClause.Occur
+import org.apache.lucene.search.{BooleanQuery, Query, TermQuery}
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.{Row, SaveMode, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.zouzias.spark.lucenerdd.LuceneRDD
-import org.zouzias.spark.lucenerdd.aws.linkage.ElapsedTime
-import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, SparkInfo, Utils}
+import org.zouzias.spark.lucenerdd.aws.utils.{SparkInfo, Utils}
 import org.zouzias.spark.lucenerdd.logging.Logging
+
+import scala.collection.mutable
 
 /**
  * Geonames deduplication example
@@ -35,34 +41,80 @@ object LinkageBlockIllinoisDonorsExample extends Logging {
     val start = System.currentTimeMillis()
 
     logInfo("Loading Geonames Cities")
-    val citiesDF = spark.read.parquet("s3://recordlinkage/geonames-usa-cities.parquet")
 
-    val andLinker = (row: Row) => {
-      val cityName = row.getString(row.fieldIndex(fieldName))
-      val nameTokenized = cityName.split(" ").map(_.replaceAll("[^a-zA-Z0-9]", "")).filter(_.length > 3).mkString(" OR ")
+    val illinoisFullDF = spark.read.parquet("s3://recordlinkage/illinois-donors-10K-sample.parquet")
+    logInfo(s"Loaded ${illinoisFullDF.count} records")
 
-      if (nameTokenized.nonEmpty) s"$fieldName:($nameTokenized)" else "*:*"
+
+    val illinoisDF = illinoisFullDF.select("RctNum", "LastOnlyName", "FirstName", "City")
+
+
+    // Custom linker
+    val linker: Row => Query = row => {
+
+      def analyze(text: String): Array[String] = {
+        val analyzer = new StandardAnalyzer()
+        val result = mutable.ArrayBuilder.make[String]()
+        val tokenStream = analyzer.tokenStream("text", text)
+        val attr = tokenStream.addAttribute(classOf[CharTermAttribute])
+        tokenStream.reset()
+        while (tokenStream.incrementToken() ) {
+          result.+=(attr.toString)
+        }
+        result.result()
+      }
+
+      val name = row.getString(row.fieldIndex("FirstName"))
+      val lastName = row.getString(row.fieldIndex("LastOnlyName"))
+
+
+      val booleanQuery = new BooleanQuery.Builder()
+      if (name != null) {
+        analyze(name)
+          .filter(_.length >= 2).foreach { nameToken =>
+          booleanQuery.add(new TermQuery(new Term("FirstName", nameToken.toLowerCase)), Occur.SHOULD)
+        }
+      }
+
+      if ( lastName != null) {
+        analyze(lastName)
+          .filter(_.length >= 2).foreach { lastNameToken =>
+          booleanQuery.add(new TermQuery(new Term("LastOnlyName", lastNameToken.toLowerCase)), Occur.SHOULD)
+        }
+      }
+
+      booleanQuery.setMinimumNumberShouldMatch(1)
+      booleanQuery.build()
     }
 
-    val linked = LuceneRDD.blockDedup(citiesDF, andLinker, Array("featureclass"))
+    val blockingFields = Array("City")
 
+    // Block entity linkage
+    val linkedResults = LuceneRDD.blockDedup(illinoisDF, linker, blockingFields)
 
-    val linkedDF = linked.map{ case (l, r) =>
-      val docs = r.flatMap(_.doc.textField(fieldName)).toArray
-      LinkedRecord(l.getString(l.fieldIndex(fieldName)),
-        Some(docs),
-        today)
-    }.toDF()
+    val linkageResults: DataFrame = spark.createDataFrame(linkedResults
+      .filter(_._2.nonEmpty)
+      .map{ case (left, topDocs) =>
+        (topDocs.head.doc.textField("RctNum").headOption,
+          left.getString(left.fieldIndex("RctNum"))
+        )
+      })
+      .toDF("left_id", "right_id")
+      .filter($"left_id".equalTo($"right_id"))
 
-    linkedDF.write.mode(SaveMode.Append)
-      .parquet(s"s3://spark-lucenerdd/timings/v${Utils.Version}/dedup-blocked-geonames-result-${sparkInfo}.parquet")
-
+    val correctHits: Double = linkageResults.count()
+    logInfo(s"Correct hits are $correctHits")
+    val total: Double = illinoisDF.count
+    val accuracy = correctHits / total
     val end = System.currentTimeMillis()
 
-    spark.createDataFrame(Seq(ElapsedTime(start, end, end - start, today, Utils.Version)))
-      .write
-      .mode(SaveMode.Append)
-      .parquet(s"s3://spark-lucenerdd/timings/visa-vs-geonames-linkage-timing-${sparkInfo}.parquet")
+    logInfo("=" * 40)
+    logInfo(s"|| Elapsed time: ${(end - start) / 1000.0} seconds ||")
+    logInfo("=" * 40)
+
+    logInfo("*" * 40)
+    logInfo(s"* Accuracy of deduplication is $accuracy *")
+    logInfo("*" * 40)
 
     // terminate spark context
     spark.stop()

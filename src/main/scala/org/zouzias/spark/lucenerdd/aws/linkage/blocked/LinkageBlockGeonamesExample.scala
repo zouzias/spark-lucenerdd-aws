@@ -1,13 +1,14 @@
 package org.zouzias.spark.lucenerdd.aws.linkage.blocked
 
+import org.apache.lucene.index.Term
+import org.apache.lucene.search.BooleanClause.Occur
+import org.apache.lucene.search.{BooleanQuery, MatchAllDocsQuery, TermQuery}
 import org.apache.spark.SparkConf
-import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Row, SaveMode, SparkSession}
 import org.zouzias.spark.lucenerdd.LuceneRDD
 import org.zouzias.spark.lucenerdd.aws.linkage.ElapsedTime
 import org.zouzias.spark.lucenerdd.aws.utils.{LinkedRecord, SparkInfo, Utils}
 import org.zouzias.spark.lucenerdd.logging.Logging
-import org.zouzias.spark.lucenerdd.models.SparkScoreDoc
 
 /**
  * Geonames deduplication example
@@ -41,16 +42,27 @@ object LinkageBlockGeonamesExample extends Logging {
 
     val andLinker = (row: Row) => {
       val cityName = row.getString(row.fieldIndex(fieldName))
-      val nameTokenized = cityName.split(" ").map(_.replaceAll("[^a-zA-Z0-9]", "")).filter(_.length > 3).mkString(" OR ")
+      val nameTokenized = cityName.split(" ").map(_.replaceAll("[^a-zA-Z0-9]", "")).filter(_.length > 3)
 
-      if (nameTokenized.nonEmpty) s"$fieldName:($nameTokenized)" else "*:*"
+      val booleanQuery = new BooleanQuery.Builder()
+
+      if (nameTokenized.nonEmpty) {
+         nameTokenized.foreach { nameToken =>
+            booleanQuery.add(new TermQuery(new Term(fieldName, nameToken.toLowerCase)), Occur.SHOULD)
+          }
+
+        booleanQuery.build()
+      }
+       else {
+         new MatchAllDocsQuery()
+       }
     }
 
     val linked = LuceneRDD.blockDedup(citiesDF, andLinker, Array("featureclass"))
 
 
     val linkedDF = linked.map{ case (l, r) =>
-      val docs = r.flatMap(_.doc.textField(fieldName)).toArray
+      val docs = r.flatMap(_.doc.textField(fieldName))
       LinkedRecord(l.getString(l.fieldIndex(fieldName)),
         Some(docs),
         today)

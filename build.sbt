@@ -10,8 +10,8 @@ resolvers += "OSS Snapshots" at "https://oss.sonatype.org/content/repositories/s
 
 libraryDependencies ++= Seq(
 	"org.zouzias" %% "spark-lucenerdd" % version.value,
-	"org.apache.hadoop" % "hadoop-aws" % "2.9.1",
-  "joda-time"   % "joda-time"					% "2.10",
+	"org.apache.hadoop" % "hadoop-aws" % "2.9.2",
+  "joda-time"   % "joda-time"					% "2.10.1",
 	"org.apache.spark" %% "spark-core" % sparkV % "provided",
 	"org.apache.spark" %% "spark-sql" % sparkV % "provided" ,
 	"org.scala-lang"    % "scala-library" % scalaVersion.value % "compile"
