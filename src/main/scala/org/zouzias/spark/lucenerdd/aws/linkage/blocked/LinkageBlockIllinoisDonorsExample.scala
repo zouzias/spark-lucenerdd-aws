@@ -42,7 +42,7 @@ object LinkageBlockIllinoisDonorsExample extends Logging {
 
     logInfo("Loading Geonames Cities")
 
-    val illinoisFullDF = spark.read.parquet("s3://recordlinkage/illinois-donors-10K-sample.parquet")
+    val illinoisFullDF = spark.read.parquet("s3://recordlinkage/illinois-donors.parquet")
     logInfo(s"Loaded ${illinoisFullDF.count} records")
 
 
