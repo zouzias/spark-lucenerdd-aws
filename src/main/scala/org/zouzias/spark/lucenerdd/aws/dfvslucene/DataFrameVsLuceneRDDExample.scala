@@ -1,6 +1,6 @@
 package org.zouzias.spark.lucenerdd.aws.dfvslucene
 
-import org.apache.spark.sql.{Row, SQLContext, SaveMode, SparkSession}
+import org.apache.spark.sql.{Row, SaveMode, SparkSession}
 import org.apache.spark.SparkConf
 import org.zouzias.spark.lucenerdd.aws.utils._
 import org.zouzias.spark.lucenerdd.facets.FacetedLuceneRDD

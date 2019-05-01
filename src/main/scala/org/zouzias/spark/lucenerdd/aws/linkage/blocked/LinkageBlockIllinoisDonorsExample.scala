@@ -45,28 +45,26 @@ object LinkageBlockIllinoisDonorsExample extends Logging {
     val illinoisFullDF = spark.read.parquet("s3://recordlinkage/illinois-donors.parquet")
     logInfo(s"Loaded ${illinoisFullDF.count} records")
 
+    def analyze(text: String): Array[String] = {
+      val analyzer = new StandardAnalyzer()
+      val result = mutable.ArrayBuilder.make[String]()
+      val tokenStream = analyzer.tokenStream("text", text)
+      val attr = tokenStream.addAttribute(classOf[CharTermAttribute])
+      tokenStream.reset()
+      while (tokenStream.incrementToken() ) {
+        result.+=(attr.toString)
+      }
+      result.result()
+    }
+
 
     val illinoisDF = illinoisFullDF.select("RctNum", "LastOnlyName", "FirstName", "City")
 
 
     // Custom linker
     val linker: Row => Query = row => {
-
-      def analyze(text: String): Array[String] = {
-        val analyzer = new StandardAnalyzer()
-        val result = mutable.ArrayBuilder.make[String]()
-        val tokenStream = analyzer.tokenStream("text", text)
-        val attr = tokenStream.addAttribute(classOf[CharTermAttribute])
-        tokenStream.reset()
-        while (tokenStream.incrementToken() ) {
-          result.+=(attr.toString)
-        }
-        result.result()
-      }
-
       val name = row.getString(row.fieldIndex("FirstName"))
       val lastName = row.getString(row.fieldIndex("LastOnlyName"))
-
 
       val booleanQuery = new BooleanQuery.Builder()
       if (name != null) {
@@ -87,6 +85,7 @@ object LinkageBlockIllinoisDonorsExample extends Logging {
       booleanQuery.build()
     }
 
+    // Block on the City field
     val blockingFields = Array("City")
 
     // Block entity linkage
@@ -95,7 +94,7 @@ object LinkageBlockIllinoisDonorsExample extends Logging {
     val linkageResults: DataFrame = spark.createDataFrame(linkedResults
       .filter(_._2.nonEmpty)
       .map{ case (left, topDocs) =>
-        (topDocs.head.doc.textField("RctNum").headOption,
+        (topDocs.head.getString(topDocs.head.fieldIndex("RctNum")),
           left.getString(left.fieldIndex("RctNum"))
         )
       })

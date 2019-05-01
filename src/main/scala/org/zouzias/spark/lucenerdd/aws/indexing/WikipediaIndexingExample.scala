@@ -25,9 +25,9 @@ object WikipediaIndexingExample extends Logging {
     val executorCores = conf.get("spark.executor.cores")
     val executorInstances = conf.get("spark.executor.instances")
 
-    log.info(s"Executor instances: ${executorInstances}")
-    log.info(s"Executor cores: ${executorCores}")
-    log.info(s"Executor memory: ${executorMemory}")
+    log.info(s"Executor instances: $executorInstances")
+    log.info(s"Executor cores: $executorCores")
+    log.info(s"Executor memory: $executorMemory")
 
     logInfo("Loading Wikipedia titles")
     val sparkInfo = SparkInfo(executorInstances, executorMemory, executorCores)

@@ -28,9 +28,9 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
       val fieldName = "City"
 
 
-      log.info(s"Executor instances: ${executorInstances}")
-      log.info(s"Executor cores: ${executorCores}")
-      log.info(s"Executor memory: ${executorMemory}")
+      log.info(s"Executor instances: $executorInstances")
+      log.info(s"Executor cores: $executorCores")
+      log.info(s"Executor memory: $executorMemory")
 
       val start = System.currentTimeMillis()
 
@@ -56,8 +56,8 @@ object SpatialWorldCitiesSelfLinkage extends Logging {
       val linkage = shapes.linkByRadius(cities.rdd, coord, 3)
 
 
-      import spark.implicits._
-      val asCaseClass =linkage.map{ case (left, right) => LinkedSpatialRecord(left._2, right.headOption.flatMap(_.doc.textField(fieldName)))}
+      val asCaseClass =linkage.map{ case (left, right) =>
+        LinkedSpatialRecord(left._2, right.headOption.map(x => x.getString(x.fieldIndex(fieldName))))}
       val linkedDF = spark.createDataFrame(asCaseClass)
 
       linkedDF.write.mode(SaveMode.Append)

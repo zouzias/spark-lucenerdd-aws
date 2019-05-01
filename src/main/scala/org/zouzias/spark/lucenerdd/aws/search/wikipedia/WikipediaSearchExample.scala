@@ -56,7 +56,7 @@ object WikipediaSearchExample extends Logging {
 
     val today = Utils.dayString()
 
-    val timings = wikiSample.map{ case title =>
+    val timings = wikiSample.map{title =>
 
       val start = System.currentTimeMillis()
       searchType match{

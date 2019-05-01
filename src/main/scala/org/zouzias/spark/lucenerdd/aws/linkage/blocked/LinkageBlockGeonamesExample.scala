@@ -62,9 +62,9 @@ object LinkageBlockGeonamesExample extends Logging {
 
 
     val linkedDF = linked.map{ case (l, r) =>
-      val docs = r.flatMap(_.doc.textField(fieldName))
+      val docs = r.map(x => x.getString(x.fieldIndex(fieldName)))
       LinkedRecord(l.getString(l.fieldIndex(fieldName)),
-        Some(docs),
+        docs,
         today)
     }.toDF()
 
