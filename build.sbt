@@ -1,7 +1,7 @@
 organization := "org.zouzias"
 name := "spark-lucenerdd-aws"
 scalaVersion := "2.11.12"
-val sparkV = "2.4.2"
+val sparkV = "2.4.8"
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
 
